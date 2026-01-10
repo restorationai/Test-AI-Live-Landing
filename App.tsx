@@ -703,7 +703,7 @@ const HowToGetStarted: React.FC<{ onCtaClick: () => void }> = ({ onCtaClick }) =
 
 const FinalCTA = React.forwardRef<HTMLDivElement>((_, ref) => {
   return (
-    <section ref={ref} className="py-12 md:py-24 px-6 bg-black relative overflow-hidden text-center scroll-mt-20">
+    <section ref={ref} className="py-12 md:py-24 px-6 bg-black relative text-center scroll-mt-20">
       <div className="absolute inset-0 bg-grid-pattern opacity-60 pointer-events-none" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full radial-glow-section pointer-events-none" />
       
@@ -728,16 +728,14 @@ const FinalCTA = React.forwardRef<HTMLDivElement>((_, ref) => {
             Pick a date and time that works best for you.
           </p>
           
-          <div className="w-full max-w-5xl mx-auto glass-card rounded-[2rem] md:rounded-[3rem] overflow-hidden border border-brand-primary/40 shadow-[0_0_80px_rgba(0,210,255,0.15)]">
-            <div className="w-full bg-brand-navy/50 p-1 md:p-4">
-              <iframe 
-                src="https://link.restorationai.io/widget/booking/nxDQ6IYn3QIIvrXS6Ib0" 
-                style={{ width: '100%', border: 'none', height: '900px' }} 
-                scrolling="no" 
-                title="Restoration AI Booking Calendar"
-                id="amzzk8cUTFJTWf00mnGo_1767992691847"
-              />
-            </div>
+          <div className="w-full max-w-5xl mx-auto">
+            <iframe 
+              src="https://link.restorationai.io/widget/booking/nxDQ6IYn3QIIvrXS6Ib0" 
+              style={{ width: '100%', border: 'none', minHeight: '1600px' }} 
+              scrolling="auto" 
+              title="Restoration AI Booking Calendar"
+              id="amzzk8cUTFJTWf00mnGo_1767992691847"
+            />
           </div>
         </div>
       </div>
