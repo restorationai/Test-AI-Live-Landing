@@ -1,6 +1,7 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import WorkflowAnimation from './WorkflowAnimation';
-import { Loader2, Square, AlertCircle, RefreshCw, Sparkles, Mic, PhoneCall, ShieldCheck, Zap, TrendingUp, MessageSquare, X } from 'lucide-react';
+import { Loader2, Square, AlertCircle, RefreshCw, Sparkles, Mic, PhoneCall, ShieldCheck, Zap, TrendingUp, MessageSquare, X, ArrowDown } from 'lucide-react';
 
 /**
  * Premium Upgrade Button Component
@@ -39,55 +40,6 @@ const Button: React.FC<{
           {subtext}
         </span>
       )}
-    </div>
-  );
-};
-
-/**
- * Calendar Booking Modal Component
- */
-const CalendarModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/90 backdrop-blur-xl animate-in fade-in duration-300" 
-        onClick={onClose} 
-      />
-      
-      {/* Modal Content */}
-      <div className="relative w-full max-w-4xl max-h-[90vh] glass-card rounded-[2rem] md:rounded-[3rem] overflow-hidden border-brand-primary/40 shadow-[0_0_100px_rgba(0,210,255,0.2)] flex flex-col animate-in zoom-in-95 duration-300">
-        
-        {/* Header/Close */}
-        <div className="absolute top-4 right-4 z-20">
-          <button 
-            onClick={onClose}
-            className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors border border-white/10"
-          >
-            <X className="w-6 h-6" />
-          </button>
-        </div>
-
-        {/* Scrollable Container for Iframe */}
-        <div className="flex-grow overflow-y-auto scrollbar-hide">
-           <div className="p-4 md:p-8 pt-12 md:pt-16">
-              <div className="text-center mb-6">
-                <h2 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter">Book Your Strategy Call</h2>
-                <p className="text-brand-primary text-sm md:text-lg font-bold uppercase tracking-widest mt-1">Claim Your 30 Days Free Trial</p>
-              </div>
-              <div className="w-full bg-slate-900/50 rounded-2xl min-h-[600px] overflow-hidden">
-                <iframe 
-                  src="https://link.restorationai.io/widget/booking/nxDQ6IYn3QIIvrXS6Ib0" 
-                  style={{ width: '100%', border: 'none', height: '800px' }} 
-                  scrolling="yes" 
-                  id="amzzk8cUTFJTWf00mnGo_1767992691847"
-                />
-              </div>
-           </div>
-        </div>
-      </div>
     </div>
   );
 };
@@ -462,7 +414,7 @@ const HowItWorksStepCard: React.FC<{
   accentColor: string;
   isActive: boolean;
 }> = ({ id, title, subHeadline, supportingText, icon, accentColor, isActive }) => (
-  <div className={`flex-none w-[85%] sm:w-[440px] snap-center glass-card p-8 md:p-10 rounded-[2.5rem] relative overflow-hidden flex flex-col min-h-[460px] md:min-h-[500px] group transition-all duration-500 
+  <div className={`flex-none w-[85%] sm:w-[440px] snap-center glass-card p-8 md:p-10 rounded-[2.5rem] relative overflow-hidden flex flex-col min-h-[460px] md:min-h-[500px] group transition-all duration-500 select-none
     ${isActive ? 'scale-105 border-opacity-100 shadow-[0_0_60px_rgba(0,0,0,0.8)] opacity-100 border-2' : 'scale-100 border-opacity-30 md:border-opacity-100 opacity-50 md:opacity-100 border'}`} 
        style={{ borderTopColor: accentColor, borderTopWidth: '8px' }}>
     <div className="absolute -top-6 -right-3 text-[12rem] md:text-[14rem] font-black opacity-10 pointer-events-none select-none" style={{ color: accentColor }}>
@@ -490,6 +442,9 @@ const HowItWorksStepCard: React.FC<{
 const HowItWorks: React.FC<{ onCtaClick: () => void }> = ({ onCtaClick }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   const steps = [
     { 
@@ -536,18 +491,45 @@ const HowItWorks: React.FC<{ onCtaClick: () => void }> = ({ onCtaClick }) => {
 
   const handleScroll = () => {
     if (scrollRef.current) {
-      const scrollLeft = (scrollRef.current as any).scrollLeft;
-      const width = (scrollRef.current as any).offsetWidth;
-      const index = Math.round(scrollLeft / (width * 0.8));
-      if (index !== activeIndex && index >= 0 && index < steps.length) setActiveIndex(index);
+      const scrollL = scrollRef.current.scrollLeft;
+      // Use a slightly more robust calculation for the active index
+      const cardWidth = scrollRef.current.scrollWidth / steps.length;
+      const index = Math.round(scrollL / cardWidth);
+      if (index !== activeIndex && index >= 0 && index < steps.length) {
+        setActiveIndex(index);
+      }
     }
+  };
+
+  // Mouse Drag Handlers for Desktop
+  const onMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
+
+  const onMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  const onMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 2; // Increase multiplier for faster scroll
+    scrollRef.current.scrollLeft = scrollLeft - walk;
   };
 
   useEffect(() => {
     const el = scrollRef.current;
     if (el) {
-      (el as any).addEventListener('scroll', handleScroll);
-      return () => (el as any).removeEventListener('scroll', handleScroll);
+      el.addEventListener('scroll', handleScroll);
+      return () => el.removeEventListener('scroll', handleScroll);
     }
   }, [activeIndex]);
 
@@ -555,7 +537,7 @@ const HowItWorks: React.FC<{ onCtaClick: () => void }> = ({ onCtaClick }) => {
     <section className="py-12 md:py-20 px-6 bg-brand-navy relative overflow-hidden">
       <div className="absolute inset-0 bg-grid-pattern opacity-40 pointer-events-none" />
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="mb-4 -mx-6 md:mx-0">
+        <div className="mb-4">
           <WorkflowAnimation />
         </div>
         <div className="text-center mb-16 space-y-4">
@@ -563,7 +545,14 @@ const HowItWorks: React.FC<{ onCtaClick: () => void }> = ({ onCtaClick }) => {
           <p className="text-brand-muted text-xl md:text-3xl font-black max-w-3xl mx-auto opacity-80 uppercase tracking-wide">Instant Capture. Seamless Dispatch. Automatic Growth.</p>
         </div>
         
-        <div ref={scrollRef} className="flex gap-8 overflow-x-auto snap-x scroll-smooth scrollbar-hide pb-24 px-8 md:px-24 -mx-8 cursor-grab">
+        <div 
+          ref={scrollRef} 
+          className={`flex gap-8 overflow-x-auto snap-x scroll-smooth scrollbar-hide pb-24 px-8 md:px-24 -mx-8 ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
+          onMouseDown={onMouseDown}
+          onMouseLeave={onMouseLeave}
+          onMouseUp={onMouseUp}
+          onMouseMove={onMouseMove}
+        >
           {steps.map((step, idx) => (
             <HowItWorksStepCard key={step.id} {...step} isActive={idx === activeIndex} />
           ))}
@@ -665,50 +654,39 @@ const HowToGetStarted: React.FC<{ onCtaClick: () => void }> = ({ onCtaClick }) =
           </div>
         </div>
 
-        {/* Compact Progress Bar */}
-        <div className="mb-6 relative max-w-xl mx-auto px-4 hidden sm:block">
-          <div className="flex items-center justify-between relative">
-            <div className="absolute top-1/2 left-4 right-4 h-2 bg-white/5 rounded-full -translate-y-1/2 -z-10 overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-red-500/30 via-brand-primary/50 to-brand-primary w-[25%]" />
-            </div>
-
-            <div className="w-10 h-10 rounded-full bg-slate-950 border-2 border-white/10 flex items-center justify-center relative z-10 flex-none shadow-[0_0_15px_rgba(0,0,0,0.8)]">
-                <RedX glowing />
-            </div>
-            
-            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-none text-black font-black text-lg shadow-[0_0_15px_rgba(255,255,255,0.3)]">1</div>
-            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-none text-black font-black text-lg shadow-[0_0_15px_rgba(255,255,255,0.3)]">2</div>
-            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-none text-black font-black text-lg shadow-[0_0_15px_rgba(255,255,255,0.3)]">3</div>
-            
-            <div className="w-10 h-10 rounded-full bg-white border-2 border-brand-primary flex items-center justify-center flex-none overflow-hidden shadow-[0_0_20px_rgba(0,210,255,0.5)]">
-              <img src="https://storage.googleapis.com/msgsndr/Tx5eKisj3Xluq1SeZKe3/media/693c75ba9caf9aea42d79079.png" className="w-full h-full object-cover" alt="AI Agent" />
-            </div>
-          </div>
-        </div>
-
-        {/* Compressed List Card */}
+        {/* List Card with perfectly evenly spaced circles and line */}
         <div className="glass-card rounded-[2.5rem] overflow-hidden border-brand-primary/20 max-w-2xl mx-auto shadow-[0_0_60px_rgba(0,0,0,0.7)] relative">
-          <div className="p-6 md:p-8 space-y-6 md:space-y-8 relative">
-            {/* Animated Connector Line */}
-            <div className="absolute left-[2.4rem] md:left-[2.95rem] top-10 bottom-10 w-1.5 md:w-2 bg-white/5 rounded-full -z-0 overflow-hidden">
-                <div className="w-full bg-gradient-to-b from-red-500/20 via-brand-primary/20 to-brand-primary/40 h-full" />
+          {/* Main vertical layout - ensuring circles touch top and bottom boundaries for perfect spacing */}
+          <div className="p-8 md:p-14 relative min-h-[600px] md:min-h-[750px] flex flex-col justify-between">
+            
+            {/* Animated Connector Line - perfectly aligned with center of first and last items */}
+            <div className="absolute left-[3.25rem] md:left-[5.1rem] top-12 bottom-12 w-1.5 md:w-2 bg-white/5 rounded-full -z-0">
+                <div className="w-full bg-gradient-to-b from-red-500 via-brand-primary/50 to-brand-primary h-full shadow-[0_0_15px_rgba(0,210,255,0.2)]" />
             </div>
 
             {stepsData.map((step, i) => (
-              <div key={i} className="flex gap-5 md:gap-8 items-center group relative z-10">
-                <div className={`flex-none w-10 h-10 md:w-12 md:h-12 rounded-full ${i === 0 ? 'bg-slate-950 border-2 border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.6)]' : 'bg-white shadow-[0_0_15px_rgba(255,255,255,0.3)]'} flex items-center justify-center`}>
+              <div key={i} className="flex gap-6 md:gap-14 items-center group relative z-10">
+                {/* Fixed-size circle container */}
+                <div className={`flex-none w-10 h-10 md:w-20 md:h-20 rounded-full ${i === 0 ? 'bg-slate-950 border-2 border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.6)]' : 'bg-white shadow-[0_0_25px_rgba(255,255,255,0.35)]'} flex items-center justify-center transition-all duration-300 group-hover:scale-110`}>
                   {step.marker}
                 </div>
+                {/* Content aligned to circle */}
                 <div className="flex-grow">
-                  <h3 className={`text-white text-base md:text-xl font-black uppercase tracking-tight leading-tight ${i === 0 ? 'text-red-400/90' : ''}`}>{step.title}</h3>
-                  {step.desc && <p className="text-brand-muted text-[11px] md:text-sm font-bold opacity-80 mt-0.5">{step.desc}</p>}
+                  <h3 className={`text-white text-base md:text-3xl font-black uppercase tracking-tight leading-tight ${i === 0 ? 'text-red-400 font-bold' : ''}`}>
+                    {step.title}
+                  </h3>
+                  {step.desc && (
+                    <p className="text-brand-muted text-[11px] md:text-lg font-bold opacity-80 mt-1.5 leading-snug">
+                      {step.desc}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         </div>
         
-        <div className="flex items-center justify-center mt-10">
+        <div className="flex items-center justify-center mt-12">
           <Button 
             variant="primary" 
             className="w-full sm:w-[32rem] lg:w-[48rem] py-4"
@@ -723,32 +701,49 @@ const HowToGetStarted: React.FC<{ onCtaClick: () => void }> = ({ onCtaClick }) =
   );
 };
 
-const FinalCTA: React.FC<{ onCtaClick: () => void }> = ({ onCtaClick }) => (
-  <section className="py-24 px-6 bg-black relative overflow-hidden text-center">
-    <div className="absolute inset-0 bg-grid-pattern opacity-60 pointer-events-none" />
-    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full radial-glow-section pointer-events-none" />
-    
-    <div className="max-w-6xl mx-auto relative z-10 space-y-10">
-      <h2 className="text-5xl md:text-8xl font-black text-white uppercase tracking-tighter leading-[0.95] text-glow-sm">
-        Never Miss <br className="hidden md:block" /> Another Call
-      </h2>
-      <p className="text-brand-primary text-2xl md:text-5xl font-black uppercase tracking-widest max-w-5xl mx-auto drop-shadow-[0_0_40px_rgba(0,210,255,0.6)] leading-tight">
-        YOUR AI AGENT SECURES $30K+ EMERGENCY JOBS WHILE YOU SLEEP
-      </p>
+const FinalCTA = React.forwardRef<HTMLDivElement>((_, ref) => {
+  return (
+    <section ref={ref} className="py-12 md:py-24 px-6 bg-black relative overflow-hidden text-center scroll-mt-20">
+      <div className="absolute inset-0 bg-grid-pattern opacity-60 pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full radial-glow-section pointer-events-none" />
       
-      <div className="flex items-center justify-center pt-4">
-        <Button 
-          variant="primary" 
-          className="w-full sm:w-[32rem] lg:w-[48rem]"
-          onClick={onCtaClick}
-          subtext={<StrategyCallSubtext />}
-        >
-          {STRATEGY_CALL_LABEL}
-        </Button>
+      <div className="max-w-6xl mx-auto relative z-10">
+        <div className="space-y-4 md:space-y-10">
+          <h2 className="text-[7.5vw] md:text-7xl lg:text-8xl font-black uppercase tracking-tighter leading-tight flex flex-col items-center">
+            <span className="text-brand-primary text-glow-sm block w-full whitespace-nowrap overflow-visible">
+              CLAIM YOUR 30 DAYS FREE
+            </span>
+            <span className="text-white drop-shadow-[0_0_25px_rgba(255,255,255,0.8)] flex items-center justify-center w-full mt-1 md:mt-4 whitespace-nowrap overflow-visible">
+              <span className="inline-block">BOOK A STRATEGY CALL</span>
+            </span>
+          </h2>
+          <p className="text-white text-base md:text-2xl font-bold max-w-4xl mx-auto leading-relaxed opacity-90 px-4 md:px-0">
+            This is a quick 15-minute call to see how Restoration AI fits into your business. <span className="hidden md:inline">We’ll walk through exactly how it would handle your calls, dispatch, and follow ups in real scenarios.</span>
+          </p>
+        </div>
+        
+        {/* Instruction and Calendar Container */}
+        <div className="mt-12 md:mt-16">
+          <p className="text-brand-primary text-xs md:text-xl font-black uppercase tracking-[0.2em] mb-4 md:mb-6">
+            Pick a date and time that works best for you.
+          </p>
+          
+          <div className="w-full max-w-5xl mx-auto glass-card rounded-[2rem] md:rounded-[3rem] overflow-hidden border border-brand-primary/40 shadow-[0_0_80px_rgba(0,210,255,0.15)]">
+            <div className="w-full bg-brand-navy/50 p-1 md:p-4">
+              <iframe 
+                src="https://link.restorationai.io/widget/booking/nxDQ6IYn3QIIvrXS6Ib0" 
+                style={{ width: '100%', border: 'none', height: '900px' }} 
+                scrolling="no" 
+                title="Restoration AI Booking Calendar"
+                id="amzzk8cUTFJTWf00mnGo_1767992691847"
+              />
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+});
 
 const Footer: React.FC = () => (
   <footer className="py-12 bg-brand-navy border-t border-white/5 px-6">
@@ -768,36 +763,25 @@ const Footer: React.FC = () => (
 );
 
 const App: React.FC = () => {
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const calendarRef = useRef<HTMLDivElement>(null);
 
-  const openCalendar = () => {
-    setIsCalendarOpen(true);
-    // Fix: Access document via globalThis to resolve the 'Cannot find name' error in this environment
-    if ((globalThis as any).document) {
-      (globalThis as any).document.body.style.overflow = 'hidden';
-    }
-  };
-
-  const closeCalendar = () => {
-    setIsCalendarOpen(false);
-    // Fix: Access document via globalThis to resolve the 'Cannot find name' error in this environment
-    if ((globalThis as any).document) {
-      (globalThis as any).document.body.style.overflow = 'auto';
+  const scrollToCalendar = () => {
+    if (calendarRef.current) {
+      calendarRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-black font-outfit">
-      <Header onCtaClick={openCalendar} />
+      <Header onCtaClick={scrollToCalendar} />
       <main className="flex-grow">
-        <Hero onCtaClick={openCalendar} />
-        <HowItWorks onCtaClick={openCalendar} />
+        <Hero onCtaClick={scrollToCalendar} />
+        <HowItWorks onCtaClick={scrollToCalendar} />
         <FAQSection />
-        <HowToGetStarted onCtaClick={openCalendar} />
-        <FinalCTA onCtaClick={openCalendar} />
+        <HowToGetStarted onCtaClick={scrollToCalendar} />
+        <FinalCTA ref={calendarRef} />
       </main>
       <Footer />
-      <CalendarModal isOpen={isCalendarOpen} onClose={closeCalendar} />
     </div>
   );
 };
