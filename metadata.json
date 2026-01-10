@@ -1,0 +1,7 @@
+{
+  "name": "Restoration Test AI Live Landing Page ",
+  "description": "High-end, futuristic landing page for an AI-powered water damage restoration SaaS, featuring a dark theme with electric cyan-blue accents and glassmorphism elements.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
