@@ -14,9 +14,9 @@
         theme: {
           extend: {
             colors: {
-              'brand-primary': '#00D2FF', // Electric cyan-blue
-              'brand-secondary': '#004696', // Deep saturated blue
-              'brand-navy': '#050a1f', // Very dark navy
+              'brand-primary': '#00D2FF',
+              'brand-secondary': '#004696',
+              'brand-navy': '#050a1f',
               'brand-slate': '#0F172A',
               'brand-muted': '#94A3B8',
             },
@@ -72,7 +72,6 @@
         scroll-snap-align: center;
       }
 
-      /* Form Input Styling adapted for Dark Theme Widget */
       .embed-input {
         width: 100%;
         background-color: rgba(15, 23, 42, 0.8);
@@ -100,7 +99,6 @@
         margin-bottom: 0.5rem;
         margin-left: 0.25rem;
       }
-      
       .call-pulse {
         animation: call-pulse-anim 2s infinite;
       }
@@ -110,7 +108,8 @@
         100% { box-shadow: 0 0 0 0 rgba(0, 210, 255, 0); }
       }
     </style>
-  <script type="importmap">
+
+    <script type="importmap">
 {
   "imports": {
     "react": "https://esm.sh/react@^19.2.3",
@@ -120,11 +119,32 @@
     "lucide-react": "https://esm.sh/lucide-react@^0.475.0"
   }
 }
-</script>
-<link rel="stylesheet" href="/index.css">
-</head>
+    </script>
+
+    <link rel="stylesheet" href="/index.css">
+
+    <!-- Meta Pixel Code -->
+    <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '640413502453389');
+      fbq('track', 'PageView');
+    </script>
+    <noscript>
+      <img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=640413502453389&ev=PageView&noscript=1"/>
+    </noscript>
+    <!-- End Meta Pixel Code -->
+
+  </head>
   <body>
     <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
-</body>
+    <script type="module" src="/index.tsx"></script>
+  </body>
 </html>
